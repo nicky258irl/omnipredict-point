@@ -1,13 +1,15 @@
+
+import type { Metadata } from "next";
 import "./globals.css";
 
-export const metadata = {
-  title: "Omni Points",
-  description: "Points dashboard"
+export const metadata: Metadata = {
+  title: "OmniPredict · Points",
+  description: "Points dashboard demo layout",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );
