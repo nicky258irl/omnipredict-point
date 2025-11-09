@@ -1,3 +1,8 @@
+/*
+const COUNT = Math.floor((window.innerWidth * window.innerHeight) / 16000);
+// 默认 24000  改成 16000 更密，8000 超密
+
+*/
 
 "use client";
 import { useEffect, useRef } from "react";
@@ -21,13 +26,13 @@ export default function Particles() {
     window.addEventListener("resize", resize);
 
     // init particles
-    const COUNT = Math.floor((window.innerWidth * window.innerHeight) / 24000);
+    const COUNT = Math.floor((window.innerWidth * window.innerHeight) / 8000);
     const particles = Array.from({length: COUNT}).map(() => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.12 * DPR,
-      vy: (Math.random() - 0.5) * 0.12 * DPR,
-      r: Math.random() * 1.6 * DPR + 0.6 * DPR,
+      vx: (Math.random() - 0.5) * 0.45 * DPR,
+      vy: (Math.random() - 0.5) * 0.45 * DPR,
+      r: Math.random() * 1.8 * DPR + 0.8 * DPR,
       a: 0.3 + Math.random() * 0.4
     }));
 
@@ -39,7 +44,9 @@ export default function Particles() {
         if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-        ctx.fillStyle = `rgba(124,157,255,${p.a})`;
+        //ctx.fillStyle = `rgba(124,157,255,${p.a})`;
+        const colors = ["124,157,255", "71,230,161", "180,130,255"];
+        ctx.fillStyle = `rgba(${colors[Math.floor(Math.random()*colors.length)]},${p.a})`;
         ctx.fill();
       }
       // connection lines
@@ -50,7 +57,7 @@ export default function Particles() {
           const dy = particles[i].y - particles[j].y;
           const d2 = dx*dx + dy*dy;
           if(d2 < maxDist*maxDist){
-            const alpha = 0.12 * (1 - Math.sqrt(d2)/maxDist);
+            const alpha = 0.3 * (1 - Math.sqrt(d2)/maxDist);
             ctx.strokeStyle = `rgba(71,230,161,${alpha})`;
             ctx.lineWidth = 0.8 * DPR;
             ctx.beginPath();

@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniPrediction Points Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0e27;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* 粒子背景 */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 头部 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .wallet-address {
+            background: #1a1f3a;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 积分英雄区 */
+        .points-hero {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 24px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .points-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .points-display {
+            position: relative;
+            z-index: 1;
+        }
+
+        .points-number {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.8)); }
+            50% { filter: drop-shadow(0 0 40px rgba(102, 126, 234, 1)); }
+        }
+
+        .points-label {
+            font-size: 18px;
+            color: #a0aec0;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .points-change {
+            font-size: 16px;
+            color: #4facfe;
+        }
+
+        .points-change .up-arrow {
+            color: #00f2fe;
+            font-weight: bold;
+        }
+
+        .tier-progress {
+            max-width: 600px;
+            margin: 40px auto 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .progress-bar-container {
+            height: 40px;
+            background: rgba(26, 31, 58, 0.8);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width 1s ease-out;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
+        }
+
+        .progress-bar-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            to { left: 100%; }
+        }
+
+        .progress-text {
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+        }
+
+        .progress-numbers {
+            font-size: 14px;
+            color: #a0aec0;
+        }
+
+        /* 双栏卡片 */
+        .two-col-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #1a1f3a;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+            border-color: rgba(102, 126, 234, 0.6);
+        }
+
+        .stat-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #a0aec0;
+            font-size: 14px;
+        }
+
+        .stat-change {
+            color: #4facfe;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        /* 赚取积分卡片 */
+        .section-title {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .earn-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .earn-card {
+            background: #1a1f3a;
+            border: 1px solid transparent;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .earn-card:hover {
+            transform: translateY(-8px);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .card-reward {
+            font-size: 24px;
+            color: #4facfe;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .card-progress {
+            color: #a0aec0;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .card-action {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .card-action:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+        }
+
+        /* 排行榜 */
+        .leaderboard {
+            background: #1a1f3a;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .leaderboard table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .leaderboard th {
+            color: #a0aec0;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .leaderboard td {
+            padding: 16px 12px;
+            background: rgba(26, 31, 58, 0.5);
+        }
+
+        .leaderboard tr {
+            transition: all 0.2s ease;
+        }
+
+        .leaderboard tbody tr:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .leaderboard tbody tr:hover td {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .highlight-row td {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2)) !important;
+            border-left: 4px solid #667eea;
+        }
+
+        .medal {
+            font-size: 20px;
+        }
+
+        .address {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .you-badge {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .points-cell {
+            color: #4facfe;
+            font-weight: 700;
+        }
+
+        .multiplier {
+            color: #00f2fe;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+        }
+
+        /* 空投倒计时 */
+        .airdrop-countdown {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1));
+            border: 1px solid rgba(240, 147, 251, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .airdrop-title {
+            font-size: 32px;
+            margin-bottom: 30px;
+        }
+
+        .condition {
+            margin-bottom: 25px;
+        }
+
+        .condition-text {
+            color: #a0aec0;
+            margin-bottom: 10px;
+        }
+
+        .airdrop-progress {
+            height: 40px;
+            background: rgba(26, 31, 58, 0.8);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .airdrop-progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width 1s ease-out;
+            position: relative;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(245, 87, 108, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(245, 87, 108, 0.8); }
+        }
+
+        .percentage {
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .estimated-time {
+            font-size: 18px;
+            color: #a0aec0;
+            margin-top: 20px;
+        }
+
+        .highlight {
+            color: #f5576c;
+            font-weight: 700;
+        }
+
+        /* Toast通知 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.5s ease-out;
+            z-index: 1000;
+            display: none;
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-icon {
+            font-size: 32px;
+        }
+
+        .toast-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .toast-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .points-number {
+                font-size: 48px;
+            }
+
+            .earn-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .leaderboard {
+                overflow-x: auto;
+            }
+
+            .wallet-address {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="logo">🌐 OmniPrediction Points</div>
+            <div class="wallet-address">👤 0x1a2b...3c4d</div>
+        </div>
+
+        <!-- 积分英雄区 -->
+        <div class="points-hero">
+            <div class="points-display">
+                <div class="points-number">✨ <span id="totalPoints">12,847</span></div>
+                <div class="points-label">TOTAL POINTS</div>
+                <div class="points-change">
+                    <span class="up-arrow">▲</span> +<span id="todayPoints">234</span> today
+                </div>
+            </div>
+
+            <div class="tier-progress">
+                <div class="tier-badge">⚡ GOLD TIER</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: 64%">
+                        <span class="progress-text">64% to Diamond</span>
+                    </div>
+                </div>
+                <div class="progress-numbers">12,847 / 20,000</div>
+            </div>
+        </div>
+
+        <!-- 双栏统计 -->
+        <div class="two-col-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-value">2.5x</div>
+                <div class="stat-label">MULTIPLIER</div>
+                <div class="stat-change">▲ +0.3x this week</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value">0.128%</div>
+                <div class="stat-label">AIRDROP SHARE</div>
+                <div class="stat-change">Est. 128,000 $OMNI</div>
+            </div>
+        </div>
+
+        <!-- 赚取积分 -->
+        <h2 class="section-title">💎 EARN POINTS</h2>
+        <div class="earn-grid">
+            <div class="earn-card" onclick="showToast('Search', '+10')">
+                <div class="card-icon">🔍</div>
+                <div class="card-title">SEARCH</div>
+                <div class="card-reward">+10 per search</div>
+                <div class="card-progress">7/10 today</div>
+                <button class="card-action">SEARCH NOW</button>
+            </div>
+
+            <div class="earn-card" onclick="showToast('Trade', '+500')">
+                <div class="card-icon">💱</div>
+                <div class="card-title">TRADE</div>
+                <div class="card-reward">+1 per $1</div>
+                <div class="card-progress">2,345 earned</div>
+                <button class="card-action">TRADE NOW</button>
+            </div>
+
+            <div class="earn-card" onclick="showToast('Stake', '+100')">
+                <div class="card-icon">🔒</div>
+                <div class="card-title">STAKE</div>
+                <div class="card-reward">+0.1 per day/$1</div>
+                <div class="card-progress">$10K staked</div>
+                <button class="card-action">STAKE MORE</button>
+            </div>
+
+            <div class="earn-card" onclick="copyReferralLink()">
+                <div class="card-icon">👥</div>
+                <div class="card-title">REFER</div>
+                <div class="card-reward">+500 per user</div>
+                <div class="card-progress">12 referred</div>
+                <button class="card-action">GET LINK</button>
+            </div>
+
+            <div class="earn-card" onclick="showToast('Content', '+200')">
+                <div class="card-icon">✍️</div>
+                <div class="card-title">CREATE</div>
+                <div class="card-reward">+200 per post</div>
+                <div class="card-progress">3 published</div>
+                <button class="card-action">PUBLISH</button>
+            </div>
+
+            <div class="earn-card" onclick="showToast('Boost', 'Activated')">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">BOOST</div>
+                <div class="card-reward">2x for 7 days</div>
+                <div class="card-progress">500 points</div>
+                <button class="card-action">BUY BOOST</button>
+            </div>
+        </div>
+
+        <!-- 排行榜 -->
+        <div class="leaderboard">
+            <h2 class="section-title">🏆 GLOBAL LEADERBOARD</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>RANK</th>
+                        <th>USER</th>
+                        <th>POINTS</th>
+                        <th>TIER</th>
+                        <th>MULTIPLIER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="medal">🥇</span></td>
+                        <td><span class="address">0xWhale...1234</span></td>
+                        <td class="points-cell">487,234</td>
+                        <td>👑 King</td>
+                        <td class="multiplier">5.0x</td>
+                    </tr>
+                    <tr>
+                        <td><span class="medal">🥈</span></td>
+                        <td><span class="address">0xDeGe...5678</span></td>
+                        <td class="points-cell">325,891</td>
+                        <td>💎 Diamond</td>
+                        <td class="multiplier">3.8x</td>
+                    </tr>
+                    <tr>
+                        <td><span class="medal">🥉</span></td>
+                        <td><span class="address">0xAlpha...9abc</span></td>
+                        <td class="points-cell">298,456</td>
+                        <td>💎 Diamond</td>
+                        <td class="multiplier">3.5x</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><span class="address">0xSigma...def0</span></td>
+                        <td class="points-cell">245,123</td>
+                        <td>🥇 Gold</td>
+                        <td class="multiplier">3.2x</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><span class="address">0xChad...1111</span></td>
+                        <td class="points-cell">198,765</td>
+                        <td>🥇 Gold</td>
+                        <td class="multiplier">2.9x</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #a0aec0;">...</td>
+                    </tr>
+                    <tr class="highlight-row">
+                        <td>47</td>
+                        <td><span class="address">0x1a2b...3c4d</span><span class="you-badge">YOU</span></td>
+                        <td class="points-cell">12,847</td>
+                        <td>🥇 Gold</td>
+                        <td class="multiplier">2.5x</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 空投倒计时 -->
+        <div class="airdrop-countdown">
+            <h2 class="airdrop-title">⏰ AIRDROP COUNTDOWN</h2>
+
+            <div class="condition">
+                <div class="condition-text">TGE when TVL reaches $10M (Currently $3.2M)</div>
+                <div class="airdrop-progress">
+                    <div class="airdrop-progress-fill" style="width: 32%">
+                        <span class="percentage">32%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="condition">
+                <div class="condition-text">OR when 10,000 users (Currently 2,341)</div>
+                <div class="airdrop-progress">
+                    <div class="airdrop-progress-fill" style="width: 23%">
+                        <span class="percentage">23%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="estimated-time">
+                Estimated: <span class="highlight">45-60 days</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast通知 -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">✨</div>
+        <div>
+            <div class="toast-title" id="toastTitle">+500 POINTS</div>
+            <div class="toast-subtitle" id="toastSubtitle">Action completed!</div>
+        </div>
+    </div>
+
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // 粒子背景
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#667eea" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: false },
+                size: { value: 3, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#667eea",
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: "none",
+                    random: false,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "repulse" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
+
+        // Toast通知
+        function showToast(action, points) {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastSubtitle = document.getElementById('toastSubtitle');
+
+            toastTitle.textContent = points + ' POINTS';
+            toastSubtitle.textContent = action + ' completed!';
+
+            toast.classList.add('show');
+
+            // 更新总积分（演示）
+            const currentPoints = parseInt(document.getElementById('totalPoints').textContent.replace(',', ''));
+            const newPoints = currentPoints + parseInt(points.replace('+', ''));
+            document.getElementById('totalPoints').textContent = newPoints.toLocaleString();
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 复制邀请链接
+        function copyReferralLink() {
+            const link = 'https://omni.ai?ref=0x1a2b3c4d';
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('Referral link copied', '+0');
+                document.getElementById('toastTitle').textContent = '📋 COPIED!';
+                document.getElementById('toastSubtitle').textContent = link;
+            });
+        }
+
+        // 数字滚动动画
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            const range = end - start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                obj.textContent = current.toLocaleString();
+                if (current === end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        // 页面加载动画
+        window.addEventListener('load', () => {
+            animateValue('totalPoints', 0, 12847, 2000);
+            animateValue('todayPoints', 0, 234, 1500);
+        });
+    </script>
+</body>
+</html>
